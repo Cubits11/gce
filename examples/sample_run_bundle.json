@@ -1,1 +1,8 @@
-
+{
+  "theta": 0.5,
+  "patterns": ["baseline", "stress"],
+  "rule": "SEQUENTIAL(DFA→RR)",
+  "J_baselines": {"baseline": 0.30, "stress": 0.40},
+  "J_composed": 0.28,
+  "objective": "minimize"
+}
