@@ -1,4 +1,4 @@
-from .api import compute_verdict
+from .api import compute_verdict, analyze_composition, fh_bounds, backend_info, format_verdict
 
 
 def _unavailable(name: str):
