@@ -1,18 +1,94 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "gce"
 version = "0.1.0"
-description = "Guardrail Composability Explorer (Gradio)"
-requires-python = ">=3.10"
-dependencies = [
-  "gradio>=4.44.0",
-  "pydantic>=2.7",
-  "jinja2>=3.1",
-  "weasyprint>=62.0",   # or "reportlab>=4.0"
+description = "Guardrail Composition Engine (GCE): lightweight API + UI surface for CC-analysis"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Pranav Bhave" }]
+keywords = ["AI safety", "guardrails", "composition", "evaluation", "security"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Topic :: Security",
+  "Topic :: Scientific/Engineering",
 ]
+
+dependencies = [
+  "numpy>=1.26",
+  "pydantic>=2.0",
+]
+
+[project.optional-dependencies]
+# Install GCE + cc-framework in one go: `pip install .[cc]`
+cc = [
+  # Use exactly one of these lines depending on your workflow:
+
+  # A) Local dev: (comment out; installed separately via pip -e ../cc-framework)
+  # (leave empty here)
+
+  # B) Git dependency:
+  "cc-framework @ git+https://github.com/Cubits11/cc-framework@main",
+
+  # C) PyPI release (when available):
+  # "cc-framework>=0.2.0",
+]
+
+dev = [
+  "pytest>=7.4",
+  "pytest-cov>=4.1",
+  "ruff>=0.6",
+  "black>=24.3",
+  "mypy>=1.10",
+  "types-PyYAML>=6.0.12",
+]
+
+[project.scripts]
+gce-backend-info = "gce.cli:print_backend_info"
+gce-cc-quickcheck = "gce.cli:cc_quickcheck"
+
+[project.urls]
+Homepage = "https://github.com/Cubits11/gce"
+Repository = "https://github.com/Cubits11/gce"
+Issues = "https://github.com/Cubits11/gce/issues"
+
+# --- setuptools src-layout ---
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["gce*"]
+
+# --- ruff/black/mypy (tiny defaults) ---
+[tool.ruff]
+line-length = 100
+target-version = "py39"
 
 [tool.black]
 line-length = 100
+target-version = ["py39"]
 
-[tool.ruff]
-line-length = 100
-select = ["E","F","I","UP"]
+[tool.mypy]
+python_version = "3.9"
+warn_unused_configs = true
+warn_redundant_casts = true
+no_implicit_optional = true
+pretty = true
+exclude = ["tests/"]
+
+# --- pytest (optional) ---
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --maxfail=1 --disable-warnings"
