@@ -6,17 +6,15 @@ Paste a run bundle → get CC verdict, one-line recommendation, and next tests i
 ## Quickstart
 ```bash
 uv venv && uv pip install -e .
-python -m src.gce.app.gradio_app
+python -m gce.ui.app
+```
 
-Open the printed URL. Paste examples/sample_run_bundle.json. Click Compute:
+Open the printed URL, paste or upload `examples/sample_run_bundle.json`, then click **Compute verdict** to view:
 
-Label chip (🟢/🟡/🔴)
-
-One-line recommendation
-
-3–4 Next Tests
-
-Export JSON / Download 1-pager
+- Label chip (🟢/🟡/🔴) with CC ratio
+- One-line recommendation
+- 3–4 next tests plus checklist bullets
+- Export buttons (JSON + PDF one-pager)
 
 Method (short)
 
@@ -34,7 +32,7 @@ CC > 1.05: Destructive
 
 Screenshots
 
-(…add 2–3 images…)
+![GCE verdict UI](assets/screenshots/gce-ui.png)
 
 Limitations & Ethics
 
