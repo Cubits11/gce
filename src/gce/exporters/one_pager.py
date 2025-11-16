@@ -5,25 +5,108 @@ import json
 import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Mapping, Optional, Sequence
 
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
 from reportlab.pdfgen import canvas
 
-from ..core.cc_surface.api import Verdict
+from ..core.cc_surface.api import RunBundle, Verdict
 
 
-def verdict_to_json(verdict: Verdict, *, metadata: Optional[Dict[str, Any]] = None) -> str:
-    """Serialize a :class:`Verdict` with minimal metadata."""
+def _normalize_mapping(payload: Any) -> Dict[str, Any]:
+    if payload is None:
+        return {}
+    if isinstance(payload, Mapping):
+        return dict(payload)
+    if hasattr(payload, "model_dump"):
+        return payload.model_dump()
+    if hasattr(payload, "__dict__"):
+        return {
+            key: value
+            for key, value in payload.__dict__.items()
+            if not key.startswith("_")
+        }
+    raise TypeError(f"Unsupported payload type: {type(payload)!r}")
 
+
+def build_payload(
+    bundle: RunBundle | Mapping[str, Any] | None,
+    verdict: Verdict,
+    *,
+    metadata: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
     payload: Dict[str, Any] = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "verdict": verdict.model_dump(),
+        "bundle": _normalize_mapping(bundle) if bundle is not None else {},
+        "verdict": _normalize_mapping(verdict),
     }
     if metadata:
         payload["metadata"] = metadata
-    return json.dumps(payload, indent=2)
+    return payload
+
+
+def verdict_to_json(
+    verdict: Verdict,
+    *,
+    bundle: RunBundle | Mapping[str, Any] | None = None,
+    metadata: Optional[Dict[str, Any]] = None,
+) -> str:
+    """Serialize a :class:`Verdict` with optional bundle + metadata."""
+
+    return json.dumps(build_payload(bundle, verdict, metadata=metadata), indent=2)
+
+
+def render_text_report(
+    bundle: RunBundle | Mapping[str, Any],
+    verdict: Verdict,
+    *,
+    title: str = "Guardrail One-Pager",
+) -> str:
+    bundle_payload = _normalize_mapping(bundle)
+    verdict_payload = _normalize_mapping(verdict)
+
+    def _list_section(header: str, items: Sequence[str] | None) -> list[str]:
+        lines = [header]
+        for idx, item in enumerate(items or [], 1):
+            lines.append(f"{idx}. {item}")
+        return lines or [header, "(none)"]
+
+    cc_value = verdict_payload.get("CC")
+    try:
+        cc_display = float(cc_value)
+    except (TypeError, ValueError):
+        cc_display = float("nan")
+
+    lines = [title, "=" * len(title)]
+    lines.append(
+        f"Rule: {bundle_payload.get('rule', '?')} (θ={bundle_payload.get('theta', '?')})"
+    )
+    lines.append(f"Objective: {bundle_payload.get('objective', '?')}")
+    lines.append(
+        f"Label: {verdict_payload.get('label', '?')} (CC={cc_display:.2f})"
+    )
+    lines.append("")
+    lines.append("Recommendation")
+    lines.append(verdict_payload.get("recommendation", "No recommendation available."))
+    lines.append("")
+    lines.extend(_list_section("Next Tests", verdict_payload.get("next_tests", [])))
+    lines.append("")
+    lines.extend(_list_section("Checklist", verdict_payload.get("checklist", [])))
+    return "\n".join(lines).strip() + "\n"
+
+
+def export_one_pager(
+    bundle: RunBundle | Mapping[str, Any],
+    verdict: Verdict,
+    output_path: Path,
+    *,
+    title: str = "Guardrail One-Pager",
+) -> Path:
+    output_path = Path(output_path)
+    report = render_text_report(bundle, verdict, title=title)
+    output_path.write_text(report)
+    return output_path
 
 
 def verdict_to_pdf(
