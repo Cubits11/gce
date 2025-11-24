@@ -1,0 +1,15 @@
+{
+    "theta": 0.40,
+    "patterns": [
+      "baseline",
+      "homoglyph_attack",
+      "whitespace_injection"
+    ],
+    "rule": "SEQUENTIAL(DFA→RR)",
+    "J_baselines": {
+      "dfa_only": 0.32,
+      "rr_only": 0.28
+    },
+    "J_composed": 0.20,
+    "objective": "minimize"
+  }

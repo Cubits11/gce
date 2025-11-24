@@ -1,0 +1,15 @@
+{
+    "theta": 0.50,
+    "patterns": [
+      "baseline",
+      "prompt_injection"
+    ],
+    "rule": "PARALLEL(ENSEMBLE@MAJORITY)",
+    "J_baselines": {
+      "classifier_A": 0.25,
+      "classifier_B": 0.27
+    },
+    "J_composed": 0.26,
+    "objective": "minimize"
+  }
+  

@@ -1,0 +1,16 @@
+{
+    "theta": 0.65,
+    "patterns": [
+      "baseline",
+      "jailbreak_roleplay",
+      "obfuscated_commands"
+    ],
+    "rule": "PARALLEL(VOTE@2/3)",
+    "J_baselines": {
+      "rail_A": 0.82,
+      "rail_B": 0.79
+    },
+    "J_composed": 0.60,
+    "objective": "maximize"
+  }
+  
