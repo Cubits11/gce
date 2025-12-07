@@ -16,7 +16,7 @@ import math
 import numpy as np
 import pytest
 
-from gce.core.youden import youden_j
+from gce.core.cc_surface.youden import youden_j
 
 
 # ---------------------------------------------------------------------------
