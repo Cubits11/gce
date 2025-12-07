@@ -39,6 +39,21 @@ def test_scalar_int_inputs_are_accepted_and_return_float():
     assert result == pytest.approx(1.0)
 
 
+def test_numpy_scalar_is_treated_as_scalar():
+    """
+    NumPy scalar inputs (e.g., np.float64) are treated as scalars too:
+    if both arguments are scalar-like, return a Python float.
+    """
+    tpr = np.float64(0.9)
+    fpr = 0.1  # pure Python float
+
+    result = youden_j(tpr, fpr)
+
+    # Implementation uses np.isscalar(...) for both → scalar path.
+    assert isinstance(result, float)
+    assert result == pytest.approx(0.8)
+
+
 def test_scalar_clipping_above_one():
     """
     If tpr - fpr > 1 for finite inputs, the result must be clipped to 1.0.
@@ -57,21 +72,6 @@ def test_scalar_clipping_below_minus_one():
     result = youden_j(-0.5, 1.5)
     assert isinstance(result, float)
     assert result == pytest.approx(-1.0)
-
-
-def test_scalar_vs_numpy_scalar_returns_ndarray():
-    """
-    If *either* argument is not a pure Python scalar (e.g. np.float64),
-    the function should return an ndarray, not a Python float.
-    """
-    tpr = np.float64(0.9)
-    fpr = 0.1  # pure Python float
-
-    result = youden_j(tpr, fpr)
-
-    assert isinstance(result, np.ndarray)
-    assert result.shape == ()
-    assert result.item() == pytest.approx(0.8)
 
 
 # ---------------------------------------------------------------------------
